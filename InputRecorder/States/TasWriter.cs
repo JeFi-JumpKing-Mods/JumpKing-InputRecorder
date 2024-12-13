@@ -21,17 +21,19 @@ public class TasWriter : IDisposable
         _workerThread.Start();
     }
 
-    public void WriteLineQueued(string line)
+    public void WriteLineQueued(string text)
     {
-        _taskQueue.Add(() => _writer.WriteLine(line));
-        _writeCounter++;
+        foreach (string line in text.Split(new[] { Environment.NewLine }, StringSplitOptions.None)) {
+            _taskQueue.Add(() => _writer.WriteLine(line));
+            _writeCounter++;
 #if DEBUG
-        Debug.WriteLine($"TAS:{line}");
+            Debug.WriteLine($"TAS:{line}");
 #endif
 
-        if (_writeCounter >= MaxFlushCounter)
-        {
-            FlushQueued();
+            if (_writeCounter >= MaxFlushCounter)
+            {
+                FlushQueued();
+            }
         }
     }
 

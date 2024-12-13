@@ -65,6 +65,7 @@ public static class InputRecorder
         Harmony harmony = new Harmony(HARMONY_IDENTIFIER);
 
         new Patching.JumpGame(harmony);
+        new Patching.EndingManager(harmony);
 
 #if DEBUG
         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", null);
@@ -79,10 +80,7 @@ public static class InputRecorder
         }
 
         MapName = GetMapName();
-        Type achievementManagerType = AccessTools.TypeByName("JumpKing.MiscSystems.Achievements.AchievementManager");
-        object achievementManagerinstance = AccessTools.Field(achievementManagerType, "instance").GetValue(null);
-        MethodInfo GetCurrentStats = AccessTools.Method(achievementManagerType, "GetCurrentStats");
-        CurrentStats = (PlayerStats)GetCurrentStats.Invoke(achievementManagerinstance, null);
+        CurrentStats = GetCurrentStats();
 
         string timestamp = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
         string fileName = $"{timestamp}_{Sanitize(MapName)}_A{CurrentStats.attempts}-S{CurrentStats.session}.tas";
@@ -120,6 +118,12 @@ public static class InputRecorder
     //     }
     // }
 
+    public static PlayerStats GetCurrentStats() {
+        Type achievementManagerType = AccessTools.TypeByName("JumpKing.MiscSystems.Achievements.AchievementManager");
+        object achievementManagerinstance = AccessTools.Field(achievementManagerType, "instance").GetValue(null);
+        MethodInfo GetCurrentStats = AccessTools.Method(achievementManagerType, "GetCurrentStats");
+        return (PlayerStats)GetCurrentStats.Invoke(achievementManagerinstance, null);
+    }
     private static string GetMapName() {
         JKContentManager contentManager = Game1.instance.contentManager;
         if (contentManager == null)
@@ -152,6 +156,4 @@ public static class InputRecorder
 
         return name;
     }
-
-
 }
