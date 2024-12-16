@@ -1,23 +1,21 @@
 using System.Collections.Generic;
 using JumpKing.Controller;
-using JumpKing.PauseMenu;
 
 namespace InputRecorder.States;
 public class TasState
 {
-    public int Ticks {get; set;}
-    private int Indent;
+    public int Ticks;
+    private int Indent = 2;
     public PadState PrintState;
 
-    public TasState(PadState padState, int indent = 4) : this(padState, new PadState()){
+    public TasState(PadState padState, int ticks = 1) : this(padState, new PadState(), ticks){
     }
-    public TasState(PadState padState, PadState pressedPadState,
+    public TasState(PadState padState, PadState pressedPadState, int ticks = 1,
         bool isPaused = false, bool isLastPaused = false, bool isOnGround = false,
-        int indent = 4, bool simplified = false)
+        bool simplified = false)
     {
-        Ticks = 1;
+        Ticks = ticks;
         PrintState = padState;
-        Indent = indent;
         if (simplified) {
 
         }

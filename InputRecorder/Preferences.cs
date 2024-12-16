@@ -7,17 +7,17 @@ namespace InputRecorder;
 [Serializable]
 public class Preferences : INotifyPropertyChanged
 {
-    private bool _isEnabled = false;
+    // private bool _isEnabledRecording = false;
 
-    public bool IsEnabled
-    {
-        get => _isEnabled;
-        set
-        {
-            _isEnabled = value;
-            OnPropertyChanged();
-        }
-    }
+    // public bool IsEnabledRecording
+    // {
+    //     get => _isEnabledRecording;
+    //     set
+    //     {
+    //         _isEnabledRecording = value;
+    //         OnPropertyChanged();
+    //     }
+    // }
 
     #region INotifyPropertyChanged implementation
     public event PropertyChangedEventHandler PropertyChanged;

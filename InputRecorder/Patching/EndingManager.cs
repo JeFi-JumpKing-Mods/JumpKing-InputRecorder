@@ -19,7 +19,7 @@ public class EndingManager
     }
     private static void postCheckWin(bool __result) {
         if (__result) {
-            PlayerStats stats = InputRecorder.GetCurrentStats();
+            PlayerStats stats = StateManager.GetCurrentStats();
             int hours = (int)stats.timeSpan.TotalHours;
             int minutes = stats.timeSpan.Minutes;
             int seconds = stats.timeSpan.Seconds;

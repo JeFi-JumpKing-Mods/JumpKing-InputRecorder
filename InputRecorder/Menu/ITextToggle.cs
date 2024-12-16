@@ -1,17 +1,17 @@
-﻿using JumpKing.PauseMenu.BT.Actions;
+﻿// using JumpKing.PauseMenu.BT.Actions;
 
-namespace .Menu
-{
-    public class  : ITextToggle
-    {
-        public () : base()
-        {
-        }
+// namespace .Menu
+// {
+//     public class  : ITextToggle
+//     {
+//         public () : base()
+//         {
+//         }
 
-        protected override string GetName() => "";
+//         protected override string GetName() => "";
 
-        protected override void OnToggle()
-        {
-        }
-    }
-}
+//         protected override void OnToggle()
+//         {
+//         }
+//     }
+// }
