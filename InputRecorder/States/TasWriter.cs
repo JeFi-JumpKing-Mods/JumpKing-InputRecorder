@@ -11,8 +11,8 @@ public class TasWriter : IDisposable
     private readonly StreamWriter _writer;
     private readonly BlockingCollection<Action> _taskQueue = new();
     private readonly Thread _workerThread;
-    private const int MaxFlushCounter = 50;
-    private int _writeCounter;
+    private const int MaxFlushLine = 50;
+    private int _lineCounter;
 
     public TasWriter(string path)
     {
@@ -25,12 +25,12 @@ public class TasWriter : IDisposable
     {
         foreach (string line in text.Split(new[] { Environment.NewLine }, StringSplitOptions.None)) {
             _taskQueue.Add(() => _writer.WriteLine(line));
-            _writeCounter++;
+            _lineCounter++;
 #if DEBUG
             Debug.WriteLine($"TAS:{line}");
 #endif
 
-            if (_writeCounter >= MaxFlushCounter)
+            if (_lineCounter >= MaxFlushLine)
             {
                 FlushQueued();
             }
@@ -40,12 +40,7 @@ public class TasWriter : IDisposable
     public void FlushQueued()
     {
         _taskQueue.Add(() => _writer.Flush());
-        _writeCounter = 0;
-    }
-
-    public void CloseQueued()
-    {
-        _taskQueue.CompleteAdding();
+        _lineCounter = 0;
     }
 
     private void ProcessQueue()
@@ -58,11 +53,16 @@ public class TasWriter : IDisposable
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"TasWriter Error: {ex.Message}");
+                Debug.WriteLine($"InputRecorder-TasWriter Error: {ex.Message}");
             }
         }
 
         _writer.Close();
+    }
+
+    public void CloseQueued()
+    {
+        _taskQueue.CompleteAdding();
     }
 
     public void Dispose()

@@ -8,17 +8,9 @@ public class TasState
     private int Indent = 2;
     public PadState PrintState;
 
-    public TasState(PadState padState, int ticks = 1) : this(padState, new PadState(), ticks){
-    }
-    public TasState(PadState padState, PadState pressedPadState, int ticks = 1,
-        bool isPaused = false, bool isLastPaused = false, bool isOnGround = false,
-        bool simplified = false)
-    {
-        Ticks = ticks;
+    public TasState(PadState padState, int ticks = 1){
         PrintState = padState;
-        if (simplified) {
-
-        }
+        Ticks = ticks;
     }
     public bool Extends(TasState newTasState) {
         if (newTasState.PrintState.Equals(PrintState)) {

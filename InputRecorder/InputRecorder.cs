@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
+using JumpKing;
 using JumpKing.Mods;
 using JumpKing.PauseMenu;
-using InputRecorder.States;
 
 using InputRecorder.Menu;
+using InputRecorder.States;
 
 namespace InputRecorder;
 
@@ -63,6 +64,7 @@ public static class InputRecorder
 
         new Patching.JumpGame(harmony);
         new Patching.EndingManager(harmony);
+        new Patching.OnGiveUpAch(harmony);
 
 #if DEBUG
         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", null);
@@ -84,10 +86,14 @@ public static class InputRecorder
 
     [OnLevelEnd]
     public static void OnLevelEnd() {
-        StateManager.Terminate();
         if (IsEnabledRecording) {
+            if (StateManager.EndingMessage == string.Empty) {
+                StateManager.EndingMessage = 
+                    Game1.instance.m_game.m_restart_state ? "#Restart" : "#Exit to Menu";
+            }
             StateManager.EndRecording();
         }
+        StateManager.Terminate();
     }
 
     #region Menu Items
@@ -95,6 +101,12 @@ public static class InputRecorder
     public static ToggleRecording ToggleRecording(object factory, GuiFormat format)
     {
         return new ToggleRecording();
+    }
+    [MainMenuItemSetting]
+    [PauseMenuItemSetting]
+    public static ToggleSimplifyInput ToggleSimplifyInput(object factory, GuiFormat format)
+    {
+        return new ToggleSimplifyInput();
     }
     #endregion
 

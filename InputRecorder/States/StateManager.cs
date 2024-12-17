@@ -1,16 +1,18 @@
 using HarmonyLib;
-using JumpKing.Controller;
-using JumpKing.Player;
-using BehaviorTree;
-using JumpKing.MiscSystems.Achievements;
-using JumpKing.GameManager;
-using JumpKing;
-using System.Reflection;
-using System.IO;
-using System.Text.RegularExpressions;
+
 using System;
-using JumpKing.MiscEntities.WorldItems.Inventory;
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
+
+using BehaviorTree;
+using JumpKing;
+using JumpKing.Controller;
+using JumpKing.GameManager;
 using JumpKing.MiscEntities.WorldItems;
+using JumpKing.MiscEntities.WorldItems.Inventory;
+using JumpKing.MiscSystems.Achievements;
+using JumpKing.Player;
 
 namespace InputRecorder.States;
 public static class StateManager
@@ -25,9 +27,54 @@ public static class StateManager
 
     public static PadState PadState;
     public static PadState PressedPadState;
-    public static bool isPaused = false;
-    public static bool isLastPaused = false;
-    public static bool isOnGround = false;
+    private static PadState SimplifiedPadState {
+        get {
+            if (!isLastPaused && PressedPadState.restart) {
+                return new PadState{restart = true};
+            }
+            PadState result = new();
+            if (!isPaused) {
+                if (isOnGround == BTresult.Success && failState!=BTresult.Running) {
+                    // left and right will be cancel out in InputComponent
+                    result.left = PadState.left;
+                    result.right = PadState.right;
+                    if (result.left == result.right) {
+                        result.left = false;
+                        result.right = false;
+                    }
+                    // jump input will only be meaningful when JumpState is active
+                    result.jump = PadState.jump && (jumpState == BTresult.Running || failState == BTresult.Success);
+                }
+            }
+            else {
+                result.up = PressedPadState.up;
+                result.down = PressedPadState.down;
+                result.left = PressedPadState.left;
+                result.right = PressedPadState.right;
+                result.confirm = PressedPadState.confirm;
+                result.cancel = PressedPadState.cancel;
+            }
+            if (isPaused != isLastPaused) {
+                result.pause = true;
+            }
+            if (!isLastPaused) {
+                result.boots = PressedPadState.boots;
+                result.snake = PressedPadState.snake;
+            }
+            return result;
+        }
+    }
+    private static Traverse _isOnGround;
+    private static BTresult isOnGround;
+    private static Traverse _jumpState;
+    private static BTresult jumpState = BTresult.NULL;
+    private static Traverse _failState;
+    private static BTresult failState = BTresult.NULL;
+    private static Traverse _isPaused;
+    private static bool isPaused = false;
+    private static bool isLastPaused = false;
+    public static bool isGiveUp = false;
+
 
     public static string EndingMessage;
 
@@ -35,8 +82,19 @@ public static class StateManager
         MapName = GetMapName();
         InitialStats = GetCurrentStats();
         player = GameLoop.m_player;
+        _isOnGround = Traverse.Create(player).Field("m_is_on_ground_state").Field("m_last_result");
+        _jumpState = Traverse.Create(player).Field("m_jump_state").Field("m_last_result");
+        _failState = Traverse.Create(player).Field("m_fail_state").Field("m_last_result");
+        _isPaused = Traverse.Create(AccessTools.TypeByName("JumpKing.PauseMenu.PauseManager")).Field("instance").Field("_paused");
+
+        isOnGround = BTresult.NULL;
+        jumpState = BTresult.NULL;
+        failState = BTresult.NULL;
+        isPaused = false;
+        isLastPaused = false;
+        isGiveUp = false;
+
     }
-    
     public static void StartRecording() {
         string timestamp = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
         string fileName = $"{timestamp}_{Sanitize(MapName)}_A{InitialStats.attempts}-S{InitialStats.session}.tas";
@@ -44,7 +102,7 @@ public static class StateManager
 
         writer = new TasWriter(filePath);
         writer.WriteLineQueued($"#{MapName} ({InitialStats.steam_level_id}), attempts:{InitialStats.attempts}, sessions:{InitialStats.session}");
-        writer.WriteLineQueued($"#position={player.m_body.Position}, velocity={player.m_body.Velocity}");
+        writer.WriteLineQueued($"#Position={player.m_body.Position}, Velocity={player.m_body.Velocity}");
         writer.WriteLineQueued($"#Ring={InventoryManager.HasItemEnabled(Items.SnakeRing)}, Boots={InventoryManager.HasItemEnabled(Items.GiantBoots)}");
         
 
@@ -53,6 +111,8 @@ public static class StateManager
 
         EndingMessage = "";
     }
+    // StateManager.Update() is called at the end of JumpGame.Update(), 
+    // so all game elements have been updated before.
     public static void Update() {
         if (player==null) {
             return;
@@ -60,44 +120,48 @@ public static class StateManager
 
         PadState = ControllerManager.instance.GetPadState();
         PressedPadState = ControllerManager.instance.GetPressedPadState();
-        isOnGround = (Traverse.Create(player).Field("m_is_on_ground_state").Field("m_last_result").GetValue<BTresult>() == BTresult.Success);
-        // isLastPaused = isPaused;
-        // isPaused = Traverse.Create(AccessTools.TypeByName("JumpKing.PauseMenu.PauseManager")).Field("instance").Field("_paused").GetValue<bool>();
+        isOnGround = _isOnGround.GetValue<BTresult>();
+        jumpState = _jumpState.GetValue<BTresult>();
+        failState = _failState.GetValue<BTresult>();
+        isLastPaused = isPaused;
+        isPaused = _isPaused.GetValue<bool>();
     }
-
     public static void WriteTAS() {
-        if (isOnGround && !screenState.isPreviousScreen()) {
+        if (isOnGround == BTresult.Success && !screenState.isPreviousScreen()) {
             writer.WriteLineQueued(screenState.ToTasString());
         }
 
-        TasState newTasState = (true) ? new TasState(PadState) : new TasState(PadState);
+        TasState newTasState = InputRecorder.Preferences.IsSimplifyInput ? new TasState(SimplifiedPadState) : new TasState(PadState);
         if (!currentTasState.Extends(newTasState)) {
             writer.WriteLineQueued(currentTasState.ToTasString());
             currentTasState = newTasState;
         }
     }
-
     public static void Draw() {
         return;
     }
-    
     public static void EndRecording() {
+        Update();
+        WriteTAS();
         writer.WriteLineQueued(currentTasState.ToTasString());
-        currentTasState = null;
         if (EndingMessage!=string.Empty) {
             writer.WriteLineQueued(EndingMessage);
         }
+        writer.FlushQueued();
         writer.CloseQueued();
         writer.Dispose();
 
-
+        currentTasState = null;
         player = null;
     }
-
     public static void Terminate() {
         MapName = string.Empty;
         InitialStats = new();
         player = null;
+
+        _isOnGround = new Traverse(false);
+        _isPaused = new Traverse(BTresult.Failure);
+        _jumpState = new Traverse(BTresult.Failure);
     }
 
     public static PlayerStats GetCurrentStats() {
@@ -137,5 +201,4 @@ public static class StateManager
 
         return name;
     }
-
 }

@@ -1,9 +1,9 @@
 using HarmonyLib;
-using InputRecorder.States;
+using System;
 using System.Reflection;
 using JK = JumpKing;
 using JumpKing.GameManager;
-using System;
+using InputRecorder.States;
 
 namespace InputRecorder.Patching;
 
@@ -23,6 +23,9 @@ public class JumpGame
             StateManager.Update();
             if (InputRecorder.IsEnabledRecording) {
                 StateManager.WriteTAS();
+            }
+            if (StateManager.isGiveUp) {
+                StateManager.EndRecording();
             }
         }
     }
