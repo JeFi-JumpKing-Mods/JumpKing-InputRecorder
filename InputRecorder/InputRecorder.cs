@@ -34,11 +34,11 @@ public static class InputRecorder
     public static void BeforeLevelLoad()
     {
         AssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-// #if DEBUG
-//         Debugger.Launch();
-//         Harmony.DEBUG = true;
-//         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", $@"{AssemblyPath}\harmony.log.txt");
-// #endif
+#if DEBUG
+        Debugger.Launch();
+        Harmony.DEBUG = true;
+        Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", $@"{AssemblyPath}\harmony.log.txt");
+#endif
         if (!Directory.Exists(Path.Combine(AssemblyPath, TAS_FOLDER)))
         {
             Directory.CreateDirectory(Path.Combine(AssemblyPath, TAS_FOLDER));
