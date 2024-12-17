@@ -54,9 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="Menu\*.cs" />
-    <Compile Include="Patching\*.cs" />
     <!-- <Compile Include="Entities\*.cs" /> -->
+    <Compile Include="Menu\*.cs" />
+    <Compile Include="Nodes\*.cs" />
+    <Compile Include="Patching\*.cs" />
     <Compile Include="States\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

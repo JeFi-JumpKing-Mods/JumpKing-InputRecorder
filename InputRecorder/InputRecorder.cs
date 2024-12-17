@@ -7,8 +7,10 @@ using System.Reflection;
 using JumpKing;
 using JumpKing.Mods;
 using JumpKing.PauseMenu;
+using Microsoft.Xna.Framework;
 
 using InputRecorder.Menu;
+using InputRecorder.Nodes;
 using InputRecorder.States;
 
 namespace InputRecorder;
@@ -37,6 +39,10 @@ public static class InputRecorder
 //         Harmony.DEBUG = true;
 //         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", $@"{AssemblyPath}\harmony.log.txt");
 // #endif
+        if (!Directory.Exists(Path.Combine(AssemblyPath, TAS_FOLDER)))
+        {
+            Directory.CreateDirectory(Path.Combine(AssemblyPath, TAS_FOLDER));
+        }
 
         try
         {
@@ -102,12 +108,21 @@ public static class InputRecorder
     {
         return new ToggleRecording();
     }
+
     [MainMenuItemSetting]
     [PauseMenuItemSetting]
     public static ToggleSimplifyInput ToggleSimplifyInput(object factory, GuiFormat format)
     {
         return new ToggleSimplifyInput();
     }
+
+    [MainMenuItemSetting]
+    [PauseMenuItemSetting]
+    public static ExplorerTextButton OpenFolderExplorer(object factory, GuiFormat format)
+    {
+        return new ExplorerTextButton("Open Input Files Folder", new NodeOpenFolderExplorer(AssemblyPath), Color.Lime);
+    }
+
     #endregion
 
     private static void SaveSettingsOnFile(object sender, System.ComponentModel.PropertyChangedEventArgs args)
