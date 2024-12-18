@@ -34,16 +34,37 @@ public static class StateManager
             }
             PadState result = new();
             if (!isPaused) {
-                if (isOnGround == BTresult.Success && failState!=BTresult.Running) {
-                    // left and right will be cancel out in InputComponent
+                if (isOnGround == BTresult.Success) {
+                    jumpLeniency = 2;
+                    if (failState==BTresult.Failure) {
+                        // When FailState fail (not splat), determine player is charging, walking or idling by input.
+                        result.left = PadState.left;
+                        result.right = PadState.right;
+                        result.jump = PadState.jump && jumpState == BTresult.Running;
+                    }
+                    else if (failState==BTresult.Success) {
+                        // When FailState Success, FailState.MyRun() will accept left, right, jump input.
+                        result.left = PadState.left;
+                        result.right = PadState.right;
+                        result.jump = PadState.jump;
+                    }
+                }
+                else if (jumpLeniency>0) {
+                    // JumpState has leniency (2f) when not on ground
+                    jumpLeniency--;
+                    result.jump = PadState.jump && jumpState == BTresult.Running;
+                }
+                if (jumpLeniency>=0 && jumpState == BTresult.Success) {
+                    // At first frame of jumpState == BTresult.Success, 
+                    // left & right still can affect jump direction.
+                    jumpLeniency = -1;
                     result.left = PadState.left;
                     result.right = PadState.right;
-                    if (result.left == result.right) {
-                        result.left = false;
-                        result.right = false;
-                    }
-                    // jump input will only be meaningful when JumpState is active
-                    result.jump = PadState.jump && (jumpState == BTresult.Running || failState == BTresult.Success);
+                }
+                // left and right will be cancel out in InputComponent
+                if (result.left == result.right) {
+                    result.left = false;
+                    result.right = false;
                 }
             }
             else {
@@ -69,6 +90,7 @@ public static class StateManager
     private static Traverse _jumpState;
     private static BTresult jumpState = BTresult.NULL;
     private static Traverse _failState;
+    private static int jumpLeniency = 0;
     private static BTresult failState = BTresult.NULL;
     private static Traverse _isPaused;
     private static bool isPaused = false;
@@ -89,6 +111,7 @@ public static class StateManager
 
         isOnGround = BTresult.NULL;
         jumpState = BTresult.NULL;
+        jumpLeniency = 0;
         failState = BTresult.NULL;
         isPaused = false;
         isLastPaused = false;

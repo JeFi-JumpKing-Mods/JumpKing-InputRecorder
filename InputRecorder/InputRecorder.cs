@@ -29,7 +29,7 @@ public static class InputRecorder
     public static TasBinding TasBinding { get; private set; }
 
     public static bool IsEnabledRecording = false;
-
+    
     [BeforeLevelLoad]
     public static void BeforeLevelLoad()
     {
@@ -38,6 +38,8 @@ public static class InputRecorder
         Debugger.Launch();
         Harmony.DEBUG = true;
         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", $@"{AssemblyPath}\harmony.log.txt");
+        // Auto enable TAS recording when debugging
+        IsEnabledRecording = true;
 #endif
         if (!Directory.Exists(Path.Combine(AssemblyPath, TAS_FOLDER)))
         {
