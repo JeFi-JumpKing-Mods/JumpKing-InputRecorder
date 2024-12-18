@@ -30,7 +30,7 @@ public struct TasBinding
             pause = "P",
             boots = "B",
             snake = "S",
-            restart = "X"
+            restart = "N"
         };
         return res;
     }
