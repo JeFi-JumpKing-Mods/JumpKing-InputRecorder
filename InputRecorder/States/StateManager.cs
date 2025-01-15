@@ -154,7 +154,7 @@ public static class StateManager
             writer.WriteLineQueued(screenState.ToTasString());
         }
 
-        TasState newTasState = InputRecorder.Preferences.IsSimplifyInput ? new TasState(SimplifiedPadState) : new TasState(PadState);
+        TasState newTasState = InputRecorder.Prefs.IsSimplifyInput ? new TasState(SimplifiedPadState) : new TasState(PadState);
         if (!currentTasState.Extends(newTasState)) {
             writer.WriteLineQueued(currentTasState.ToTasString());
             currentTasState = newTasState;

@@ -3,7 +3,7 @@
 namespace InputRecorder.Menu;
 public class ToggleSimplifyInput : ITextToggle
 {
-    public ToggleSimplifyInput() : base(InputRecorder.Preferences.IsSimplifyInput)
+    public ToggleSimplifyInput() : base(InputRecorder.Prefs.IsSimplifyInput)
     {
     }
 
@@ -11,6 +11,6 @@ public class ToggleSimplifyInput : ITextToggle
 
     protected override void OnToggle()
     {
-        InputRecorder.Preferences.IsSimplifyInput = toggle;
+        InputRecorder.Prefs.IsSimplifyInput = toggle;
     }
 }

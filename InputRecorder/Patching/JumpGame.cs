@@ -21,7 +21,7 @@ public class JumpGame
     private static void postUpdate() {
         if (GameLoop.instance.IsRunning()) {
             StateManager.Update();
-            if (InputRecorder.IsEnabledRecording) {
+            if (InputRecorder.Prefs.IsEnabledRecording) {
                 StateManager.WriteTAS();
             }
             if (StateManager.isGiveUp) {

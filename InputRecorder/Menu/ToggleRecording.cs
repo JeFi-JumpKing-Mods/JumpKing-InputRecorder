@@ -3,7 +3,7 @@
 namespace InputRecorder.Menu;
 public class ToggleRecording : ITextToggle
 {
-    public ToggleRecording() : base(InputRecorder.IsEnabledRecording)
+    public ToggleRecording() : base(InputRecorder.Prefs.IsEnabledRecording)
     {
     }
 
@@ -11,6 +11,6 @@ public class ToggleRecording : ITextToggle
 
     protected override void OnToggle()
     {
-        InputRecorder.IsEnabledRecording = toggle;
+        InputRecorder.Prefs.IsEnabledRecording = toggle;
     }
 }

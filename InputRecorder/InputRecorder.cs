@@ -25,10 +25,8 @@ public static class InputRecorder
     public const string TAS_FOLDER = "TAS";
 
     public static string AssemblyPath { get; set; }
-    public static Preferences Preferences { get; private set; }
+    public static Preferences Prefs { get; private set; }
     public static TasBinding TasBinding { get; private set; }
-
-    public static bool IsEnabledRecording = false;
     
     [BeforeLevelLoad]
     public static void BeforeLevelLoad()
@@ -38,8 +36,6 @@ public static class InputRecorder
         Debugger.Launch();
         Harmony.DEBUG = true;
         Environment.SetEnvironmentVariable("HARMONY_LOG_FILE", $@"{AssemblyPath}\harmony.log.txt");
-        // Auto enable TAS recording when debugging
-        IsEnabledRecording = true;
 #endif
         if (!Directory.Exists(Path.Combine(AssemblyPath, TAS_FOLDER)))
         {
@@ -48,14 +44,18 @@ public static class InputRecorder
 
         try
         {
-            Preferences = XmlSerializerHelper.Deserialize<Preferences>($@"{AssemblyPath}\{SETTINGS_FILE}");
+            Prefs = XmlSerializerHelper.Deserialize<Preferences>($@"{AssemblyPath}\{SETTINGS_FILE}");
         }
         catch (Exception e)
         {
             Debug.WriteLine($"[ERROR] [{IDENTIFIER}] {e.Message}");
-            Preferences = new Preferences();
+            Prefs = new Preferences();
         }
-        Preferences.PropertyChanged += SaveSettingsOnFile;
+        Prefs.PropertyChanged += SaveSettingsOnFile;
+        // Ture-off TAS recording if TureoffInputRecordingEverytime=true
+        if (Prefs.TurnoffInputRecordingEverytime) {
+            Prefs.IsEnabledRecording = false;
+        }
 
         try
         {
@@ -87,14 +87,14 @@ public static class InputRecorder
         }
 
         StateManager.Initialize();
-        if (IsEnabledRecording) {
+        if (Prefs.IsEnabledRecording) {
             StateManager.StartRecording();
         }
     }
 
     [OnLevelEnd]
     public static void OnLevelEnd() {
-        if (IsEnabledRecording) {
+        if (Prefs.IsEnabledRecording) {
             if (StateManager.EndingMessage == string.Empty) {
                 StateManager.EndingMessage = 
                     Game1.instance.m_game.m_restart_state ? "#Restart" : "#Exit to Menu";
@@ -131,7 +131,7 @@ public static class InputRecorder
     {
         try
         {
-            XmlSerializerHelper.Serialize($@"{AssemblyPath}\{SETTINGS_FILE}", Preferences);
+            XmlSerializerHelper.Serialize($@"{AssemblyPath}\{SETTINGS_FILE}", Prefs);
         }
         catch (Exception e)
         {

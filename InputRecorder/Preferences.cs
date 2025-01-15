@@ -7,6 +7,28 @@ namespace InputRecorder;
 [Serializable]
 public class Preferences : INotifyPropertyChanged
 {
+    private bool _turnoffInputRecordingEverytime = true;
+
+    public bool TurnoffInputRecordingEverytime
+    {
+        get => _turnoffInputRecordingEverytime;
+        set
+        {
+            _turnoffInputRecordingEverytime = value;
+            OnPropertyChanged();
+        }
+    }
+    private bool _isEnabledRecording = false;
+
+    public bool IsEnabledRecording
+    {
+        get => _isEnabledRecording;
+        set
+        {
+            _isEnabledRecording = value;
+            OnPropertyChanged();
+        }
+    }
     private bool _isSimplifyInput = false;
 
     public bool IsSimplifyInput
