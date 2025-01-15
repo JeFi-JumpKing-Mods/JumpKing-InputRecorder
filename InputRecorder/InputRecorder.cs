@@ -52,9 +52,9 @@ public static class InputRecorder
             Prefs = new Preferences();
         }
         Prefs.PropertyChanged += SaveSettingsOnFile;
-        // Ture-off TAS recording if TureoffInputRecordingEverytime=true
+        // Ture-off TAS recording if TurnoffInputRecordingEverytime=true
         if (Prefs.TurnoffInputRecordingEverytime) {
-            Prefs.IsEnabledRecording = false;
+            Prefs.IsEnableRecording = false;
         }
 
         try
@@ -87,14 +87,14 @@ public static class InputRecorder
         }
 
         StateManager.Initialize();
-        if (Prefs.IsEnabledRecording) {
+        if (Prefs.IsEnableRecording) {
             StateManager.StartRecording();
         }
     }
 
     [OnLevelEnd]
     public static void OnLevelEnd() {
-        if (Prefs.IsEnabledRecording) {
+        if (Prefs.IsEnableRecording) {
             if (StateManager.EndingMessage == string.Empty) {
                 StateManager.EndingMessage = 
                     Game1.instance.m_game.m_restart_state ? "#Restart" : "#Exit to Menu";

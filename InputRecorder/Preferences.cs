@@ -18,14 +18,14 @@ public class Preferences : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-    private bool _isEnabledRecording = false;
+    private bool _isEnableRecording = false;
 
-    public bool IsEnabledRecording
+    public bool IsEnableRecording
     {
-        get => _isEnabledRecording;
+        get => _isEnableRecording;
         set
         {
-            _isEnabledRecording = value;
+            _isEnableRecording = value;
             OnPropertyChanged();
         }
     }

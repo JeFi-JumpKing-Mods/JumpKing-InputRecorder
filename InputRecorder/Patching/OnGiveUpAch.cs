@@ -17,7 +17,7 @@ public class OnGiveUpAch
         );
     }
     private static void postMyRun() {
-        if (InputRecorder.Prefs.IsEnabledRecording) {
+        if (InputRecorder.Prefs.IsEnableRecording) {
             StateManager.EndingMessage = "#Give up";
             StateManager.isGiveUp = true;
         }
